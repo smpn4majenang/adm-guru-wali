@@ -68,7 +68,7 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans h-screen flex overflow-hidden">
 
-    <!-- LOGIN OVERLAY (Tetap Ada) -->
+    <!-- LOGIN OVERLAY -->
     <div id="loginOverlay" class="fixed inset-0 bg-[#0f172a] z-[100] flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
             <h1 class="text-2xl font-bold text-slate-900 mb-2">Portal Guru Wali</h1>
@@ -84,7 +84,7 @@
     <!-- MAIN APP CONTAINER -->
     <div id="appContainer" class="flex w-full h-full opacity-0 transition-opacity duration-500">
         
-        <!-- SIDEBAR (Sesuai Gambar 2) -->
+        <!-- SIDEBAR -->
         <aside id="sidebar" class="bg-[#1e293b] text-slate-300 w-64 flex-shrink-0 flex flex-col z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
             <div class="p-6">
                 <h2 class="text-white font-bold text-lg leading-tight uppercase tracking-wide">Administrasi Guru Wali</h2>
@@ -117,14 +117,17 @@
 
     <script>
         const CONFIG = {
-            API_URL: "", // Ganti dengan URL GAS Anda
+            API_URL: "", 
             SECRET_CODE: "guru123",
             MENUS: [
                 { id: 'identitas', label: 'Isi Identitas', icon: 'fa-id-card', desc: 'Ini adalah halaman untuk mengisi dan melihat identitas guru wali. Silakan lengkapi form di bawah ini.', fields: ['Nama Lengkap', 'NIP', 'Wali Kelas'] },
                 { id: 'program', label: 'Program Kerja', icon: 'fa-tasks', desc: 'Program kerja Guru Wali mencakup empat pilar utama sesuai dengan tugas pokoknya:', fields: ['No', 'Pilar Program', 'Bentuk Kegiatan', 'Indikator Keberhasilan'] },
                 { id: 'jadwal', label: 'Jadwal Kegiatan', icon: 'fa-calendar-alt', desc: 'Atur jadwal kegiatan perwalian sepanjang tahun pelajaran.', fields: ['No', 'Nama Kegiatan', 'Tanggal', 'Keterangan'] },
                 { id: 'data-murid', label: 'Data Murid', icon: 'fa-users', desc: 'Daftar data dasar murid dalam kelas perwalian.', fields: ['No', 'Nama Siswa', 'NISN', 'JK'] },
-                { id: 'jurnal', label: 'Jurnal Pertemuan', icon: 'fa-book', desc: 'Catat setiap kejadian penting dan tindak lanjut terhadap siswa.', fields: ['Tanggal', 'Nama Siswa', 'Kejadian', 'Tindak Lanjut'] }
+                { id: 'profil-murid', label: 'Profil Murid', icon: 'fa-user-graduate', desc: 'Lengkapi profil detail masing-masing murid.', fields: ['Nama Siswa', 'TTL', 'Alamat Lengkap', 'Nama Ortu', 'HP Ortu'] },
+                { id: 'jurnal', label: 'Jurnal Pertemuan', icon: 'fa-book', desc: 'Catat setiap kejadian penting dan tindak lanjut terhadap siswa.', fields: ['Tanggal', 'Nama Siswa', 'Kejadian', 'Tindak Lanjut'] },
+                { id: 'laporan', label: 'Laporan Perkembangan', icon: 'fa-chart-line', desc: 'Ringkasan laporan perkembangan berkala murid.', fields: ['Nama Siswa', 'Nilai Rata Rata', 'Absensi', 'Catatan'] },
+                { id: 'rencana', label: 'Rencana Peng. Diri', icon: 'fa-lightbulb', desc: 'Rencana pengembangan kompetensi guru wali secara mandiri.', fields: ['Tanggal', 'Kompetensi Target', 'Rencana Aksi', 'Hasil'] }
             ]
         };
 
@@ -167,6 +170,7 @@
                     <button onclick="app.navigate('${m.id}')" id="nav-${m.id}" 
                         class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all text-slate-400 hover:text-white group">
                         <span class="w-1 group-hover:bg-brand-blue h-5 rounded-full transition-all"></span>
+                        <i class="fas ${m.icon} w-5 text-center text-[12px] opacity-50 group-hover:opacity-100"></i>
                         <span>${m.label}</span>
                     </button>
                 `).join('');
@@ -193,7 +197,7 @@
                             <div class="space-y-4 max-w-3xl mx-auto">
                                 ${menu.fields.map(f => {
                                     const fid = f.toLowerCase().replace(/\s/g, '_');
-                                    const isLong = f === 'Bentuk Kegiatan' || f === 'Indikator Keberhasilan';
+                                    const isLong = f === 'Bentuk Kegiatan' || f === 'Indikator Keberhasilan' || f === 'Catatan' || f === 'Rencana Aksi';
                                     return `
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:items-center">
                                         <label class="text-sm font-semibold text-slate-700">${f}</label>
@@ -213,7 +217,7 @@
 
                         <div class="border-t pt-10">
                             <div class="flex justify-between items-center mb-6">
-                                <h3 class="font-bold text-slate-800">DATA TERSIMPAN</h3>
+                                <h3 class="font-bold text-slate-800 uppercase tracking-wider text-sm">DATA TERSIMPAN</h3>
                                 <button onclick="app.loadData('${menu.label}')" class="text-brand-blue text-sm font-bold flex items-center gap-2">
                                     <i class="fas fa-sync"></i> Refresh Tabel
                                 </button>
@@ -225,18 +229,28 @@
                     </div>
                 `;
 
-                // Auto-load untuk Program Kerja sebagai demo (mirip gambar 1)
                 if (menu.id === 'program') app.renderTable('Program Kerja', MOCK_PROGRAM);
             },
 
             loadData: async (sheet) => {
                 const target = document.getElementById('tableTarget');
                 target.innerHTML = `<div class="p-10 text-center"><i class="fas fa-spinner fa-spin text-2xl text-brand-blue"></i></div>`;
-                // Simulasi fetch
-                setTimeout(() => {
+                
+                try {
+                    const response = await fetch(`${CONFIG.API_URL}?menu=${encodeURIComponent(sheet)}`);
+                    let data = await response.json();
+
+                    if ((!data || data.length === 0) && sheet === 'Program Kerja') data = MOCK_PROGRAM;
+
+                    if (!data || data.length === 0) {
+                        target.innerHTML = `<div class="p-10 text-center text-slate-400">Belum ada data di cloud.</div>`;
+                    } else {
+                        app.renderTable(sheet, data);
+                    }
+                } catch (e) {
                     if (sheet === 'Program Kerja') app.renderTable(sheet, MOCK_PROGRAM);
-                    else target.innerHTML = `<div class="p-10 text-center text-slate-400">Data belum tersedia di cloud.</div>`;
-                }, 800);
+                    else target.innerHTML = `<div class="p-10 text-center text-red-400 text-sm">Gagal memuat. Periksa URL API.</div>`;
+                }
             },
 
             renderTable: (sheet, data) => {
@@ -253,7 +267,7 @@
                             </thead>
                             <tbody class="divide-y divide-slate-100">
                                 ${data.map(row => `
-                                    <tr class="hover:bg-slate-50/50">
+                                    <tr class="hover:bg-slate-50/50 transition-colors">
                                         ${headers.map(h => `
                                             <td class="px-6 py-5 text-sm text-slate-600 border-r align-top ${h === 'No' ? 'text-center font-bold w-12' : ''}">
                                                 ${h === 'Pilar_Program' ? `<strong>${row[h]}</strong>` : `<div class="whitespace-pre-line leading-relaxed">${row[h]}</div>`}
@@ -264,11 +278,11 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="p-6 bg-slate-50 flex justify-end">
+                    <div class="p-10 bg-slate-50 flex justify-end">
                         <div class="text-right">
                             <p class="text-xs text-slate-500">Mengetahui,</p>
                             <p class="text-sm font-bold mt-1">Guru Wali</p>
-                            <div class="mt-12 text-slate-400 font-light">( __________________________ )</div>
+                            <div class="mt-16 text-slate-400 font-light">( __________________________ )</div>
                         </div>
                     </div>
                 `;
@@ -276,8 +290,16 @@
 
             saveData: async (e, sheet) => {
                 e.preventDefault();
-                alert("Simulasi: Data berhasil dikirim ke Google Sheets.");
-                e.target.reset();
+                const formData = new FormData(e.target);
+                const payload = {};
+                formData.forEach((v, k) => payload[k] = v);
+
+                try {
+                    await fetch(CONFIG.API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ targetSheet: sheet, payload: payload }) });
+                    alert("Data berhasil dikirim!");
+                    e.target.reset();
+                    app.loadData(sheet);
+                } catch (err) { alert("Error simpan data."); }
             }
         };
 
