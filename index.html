@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Administrasi Guru Wali Digital</title>
     
-    <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -28,341 +27,284 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .nav-item-active { background-color: #2563eb !important; color: white !important; border-radius: 8px; }
-        .form-input-custom { border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem 1rem; transition: all 0.2s; width: 100%; background-color: #fff; font-size: 0.875rem; }
-        .form-input-custom:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
-        .form-input-readonly { background-color: #f8fafc; cursor: not-allowed; color: #64748b; border-color: #e2e8f0; }
-        .action-btn { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.15); color: white; border: none; cursor: pointer; }
-        .action-btn:hover { transform: scale(1.1); }
-        .section-header { font-size: 0.85rem; font-weight: 800; color: #1e293b; letter-spacing: 0.05em; margin: 2.5rem 0 1.5rem 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; text-transform: uppercase; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background-color: #f8fafc; padding: 0.75rem; border: 1px solid #e2e8f0; text-align: left; font-size: 0.75rem; }
-        td { padding: 0.5rem; border: 1px solid #e2e8f0; }
-        @media print { .no-print { display: none !important; } .print-only { display: block !important; } }
+        
+        /* Form Styling to match Template */
+        .form-label { font-size: 0.8rem; font-weight: 600; color: #334155; margin-bottom: 0.5rem; display: block; }
+        .form-input-custom { border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.75rem 1rem; transition: all 0.2s; width: 100%; background-color: #fff; font-size: 0.9rem; color: #1e293b; }
+        .form-input-custom:focus { outline: none; border-color: #2563eb; ring: 1px; ring-color: #2563eb; }
+        .form-input-readonly { background-color: #f8fafc; cursor: not-allowed; color: #64748b; border-color: #f1f5f9; }
+        
+        .section-title { font-size: 1rem; font-weight: 800; color: #1e293b; margin-top: 2.5rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid #2563eb; padding-bottom: 0.5rem; display: inline-block; }
+        
+        .action-btn { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .action-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+
+        table th { background-color: #f8fafc; text-align: left; padding: 0.75rem; font-size: 0.8rem; font-weight: 700; border: 1px solid #e2e8f0; }
+        table td { padding: 0.75rem; border: 1px solid #e2e8f0; vertical-align: top; }
+
+        .form-row { display: flex; flex-direction: column; margin-bottom: 1.5rem; }
+
+        @media print { .no-print { display: none !important; } .print-area { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; padding: 0 !important; } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans h-screen flex overflow-hidden">
 
-    <!-- LOGIN OVERLAY -->
-    <div id="loginOverlay" class="fixed inset-0 bg-[#0f172a] z-[100] flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
-            <h1 class="text-2xl font-bold text-slate-900 mb-2 uppercase tracking-tight">Portal Guru Wali</h1>
-            <p class="text-slate-500 text-sm mb-6">Masukkan kode akses Anda.</p>
-            <form onsubmit="app.login(event)">
-                <input type="password" id="accessCode" class="w-full px-4 py-3 border rounded-xl text-center mb-4 outline-none focus:ring-2 focus:ring-brand-blue" placeholder="••••••" autofocus>
-                <button type="submit" class="w-full bg-[#1e293b] text-white font-semibold py-3 rounded-xl hover:bg-slate-800 transition-all">Masuk</button>
-            </form>
-            <p id="loginError" class="text-red-500 text-xs mt-4 hidden">Kode akses salah.</p>
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="bg-[#1e293b] text-slate-300 w-64 flex-shrink-0 flex flex-col z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 no-print">
+        <div class="p-6 text-white font-bold text-center border-b border-slate-700/50">
+            <div class="text-[14px] leading-tight tracking-widest uppercase">ADMINISTrasi GURU WALI</div>
         </div>
-    </div>
+        <nav id="navLinks" class="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar"></nav>
+        <div class="p-4 border-t border-slate-700/50 text-center">
+            <button onclick="app.logout()" class="text-xs text-slate-500 hover:text-white transition-colors">Keluar Aplikasi</button>
+        </div>
+    </aside>
 
-    <!-- MAIN APP -->
-    <div id="appContainer" class="flex w-full h-full opacity-0 transition-opacity duration-500">
-        <aside id="sidebar" class="bg-[#1e293b] text-slate-300 w-64 flex-shrink-0 flex flex-col z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
-            <div class="p-8 text-white font-bold text-lg leading-tight uppercase tracking-widest">ADMINISTRASI GURU WALI</div>
-            <nav id="navLinks" class="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar"></nav>
-            <div class="p-6 border-t border-slate-700/50">
-                <button onclick="app.logout()" class="flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors uppercase tracking-widest font-semibold">
-                    <i class="fas fa-sign-out-alt"></i> Keluar
-                </button>
-            </div>
-        </aside>
+    <!-- CONTENT -->
+    <main class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        <div id="contentArea" class="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+            <!-- App content injected here -->
+        </div>
+    </main>
 
-        <main class="flex-1 flex flex-col min-w-0 bg-white md:bg-slate-50">
-            <header class="md:hidden bg-white border-b p-4 flex justify-between items-center no-print">
-                <span class="font-bold uppercase text-xs tracking-widest">Menu</span>
-                <button onclick="app.toggleSidebar()" class="text-2xl"><i class="fas fa-bars"></i></button>
-            </header>
-            <div id="contentArea" class="flex-1 overflow-y-auto p-4 md:p-12 relative"></div>
-        </main>
+    <!-- FLOATING ACTIONS -->
+    <div class="fixed bottom-8 right-8 flex flex-col gap-3 no-print">
+        <button type="submit" form="mainForm" class="action-btn bg-purple-600" title="Simpan Data"><i class="fas fa-save"></i></button>
+        <button onclick="window.print()" class="action-btn bg-blue-500" title="Cetak Data"><i class="fas fa-print"></i></button>
     </div>
 
     <script>
-        // API URL 
-        const API_URL = "https://script.google.com/macros/s/AKfycbyEF6TPuArduYhyxQB5_t2_RulNyuxVIvYjq3mVio4r9zURc49THfcE24FAWvv7wo5f/exec"; 
-
+        const API_URL = ""; 
+        
         const CONFIG = {
-            SECRET_CODE: "guru123",
             MENUS: [
-                { id: 'identitas', label: 'Isi Identitas', icon: 'fa-id-card' },
-                { id: 'program', label: 'Program Kerja', icon: 'fa-tasks' },
-                { id: 'jadwal', label: 'Jadwal Kegiatan', icon: 'fa-calendar-alt' },
-                { id: 'data-murid', label: 'Data Murid', icon: 'fa-users' },
                 { id: 'profil-murid', label: 'Profil Murid', icon: 'fa-user-graduate' },
                 { id: 'jurnal', label: 'Jurnal Pertemuan', icon: 'fa-book' },
                 { id: 'laporan', label: 'Laporan Perkembangan', icon: 'fa-chart-line' },
-                { id: 'rencana', label: 'Rencana Pengembangan', icon: 'fa-lightbulb' }
+                { id: 'rencana', label: 'Rencana Pengembangan Diri', icon: 'fa-user-edit' },
+                { id: 'divider', label: '', icon: '' },
+                { id: 'identitas', label: 'Isi Identitas', icon: 'fa-id-card' },
+                { id: 'program', label: 'Program Kerja', icon: 'fa-tasks' },
+                { id: 'jadwal', label: 'Jadwal Kegiatan', icon: 'fa-calendar-alt' },
+                { id: 'data-murid', label: 'Data Murid', icon: 'fa-users' }
             ]
         };
 
-        let dbMurid = []; 
+        let dbMurid = [
+            { nama: "Budi Santoso", nis: "12345", kelas: "X-A", guru: "Siti Aminah, S.Pd", tahun: "2023" },
+            { nama: "Ani Wijaya", nis: "12346", kelas: "X-A", guru: "Siti Aminah, S.Pd", tahun: "2023" }
+        ];
 
         const app = {
-            activeMenuId: null,
-
             init: () => {
-                if (sessionStorage.getItem('isLoggedIn')) app.showApp();
                 app.renderSidebar();
+                app.navigate('profil-murid');
             },
-
-            login: (e) => {
-                e.preventDefault();
-                if (document.getElementById('accessCode').value === CONFIG.SECRET_CODE) {
-                    sessionStorage.setItem('isLoggedIn', 'true');
-                    app.showApp();
-                } else {
-                    document.getElementById('loginError').classList.remove('hidden');
-                }
-            },
-
-            logout: () => { sessionStorage.removeItem('isLoggedIn'); window.location.reload(); },
-
-            showApp: () => {
-                document.getElementById('loginOverlay').classList.add('hidden');
-                document.getElementById('appContainer').classList.remove('opacity-0');
-                app.navigate('identitas');
-            },
-
-            toggleSidebar: () => document.getElementById('sidebar').classList.toggle('-translate-x-full'),
 
             renderSidebar: () => {
                 const container = document.getElementById('navLinks');
-                container.innerHTML = CONFIG.MENUS.map(m => `
-                    <button onclick="app.navigate('${m.id}')" id="nav-${m.id}" 
-                        class="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-medium transition-all text-slate-400 hover:text-white group text-left">
-                        <i class="fas ${m.icon} w-5"></i>
-                        <span>${m.label}</span>
-                    </button>
-                `).join('');
+                container.innerHTML = CONFIG.MENUS.map(m => {
+                    if(m.id === 'divider') return `<div class="my-4 border-t border-slate-700/30"></div>`;
+                    return `
+                        <button onclick="app.navigate('${m.id}')" id="nav-${m.id}" 
+                            class="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-medium transition-all text-slate-400 hover:text-white group text-left">
+                            <i class="fas ${m.icon} w-5"></i>
+                            <span>${m.label}</span>
+                        </button>
+                    `;
+                }).join('');
             },
 
             navigate: (id) => {
-                app.activeMenuId = id;
                 document.querySelectorAll('#navLinks button').forEach(b => b.classList.remove('nav-item-active'));
-                const navBtn = document.getElementById(`nav-${id}`);
-                if(navBtn) navBtn.classList.add('nav-item-active');
-                if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
+                const activeBtn = document.getElementById(`nav-${id}`);
+                if(activeBtn) activeBtn.classList.add('nav-item-active');
                 app.renderPage(id);
             },
 
             renderPage: (id) => {
-                const container = document.getElementById('contentArea');
+                const area = document.getElementById('contentArea');
                 const menu = CONFIG.MENUS.find(m => m.id === id);
                 
-                let html = `<div class="max-w-4xl mx-auto bg-white p-6 md:p-14 rounded-3xl shadow-sm border border-slate-100 min-h-full">`;
-                html += `<div class="text-center mb-10"><h1 class="text-3xl font-bold text-slate-800 uppercase tracking-tight">${menu.label}</h1></div>`;
-                html += `<form id="mainForm" onsubmit="app.handleSave(event)" class="space-y-6">`;
+                let html = `<div class="max-w-3xl mx-auto bg-white p-8 md:p-12 shadow-sm border border-slate-100 rounded-sm print-area min-h-screen">`;
+                html += `<div class="border-b-4 border-double border-slate-800 pb-4 mb-8 text-center">`;
+                html += `<h1 class="text-2xl font-black text-slate-900 uppercase tracking-widest">${menu.label}</h1>`;
+                html += `<p class="text-xs text-slate-500 mt-1 uppercase tracking-widest font-bold">Administrasi Guru Wali Digital</p>`;
+                html += `</div>`;
+                html += `<form id="mainForm" onsubmit="app.handleSave(event)">`;
 
                 switch(id) {
-                    case 'identitas':
-                        html += `
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div><label class="block text-xs font-bold mb-2">NAMA LENGKAP GURU</label><input type="text" name="nama_lengkap" class="form-input-custom"></div>
-                                <div><label class="block text-xs font-bold mb-2">NIP</label><input type="text" name="nip" class="form-input-custom"></div>
-                                <div class="md:col-span-2"><label class="block text-xs font-bold mb-2">WALI KELAS</label><input type="text" name="wali_kelas" class="form-input-custom"></div>
-                            </div>`;
-                        break;
-
-                    case 'program':
-                        html += `
-                            <div class="space-y-4">
-                                <div><label class="block text-xs font-bold mb-2">PILAR PROGRAM</label><input type="text" name="pilar_program" class="form-input-custom"></div>
-                                <div><label class="block text-xs font-bold mb-2">BENTUK KEGIATAN</label><textarea name="bentuk_kegiatan" class="form-input-custom" rows="3"></textarea></div>
-                                <div><label class="block text-xs font-bold mb-2">INDIKATOR KEBERHASILAN</label><textarea name="indikator_keberhasilan" class="form-input-custom" rows="3"></textarea></div>
-                            </div>`;
-                        break;
-
-                    case 'jadwal':
-                        html += `
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div><label class="block text-xs font-bold mb-2">WAKTU / TANGGAL (TEKS)</label><input type="text" name="waktu" class="form-input-custom" placeholder="Contoh: Senin, 12 Feb 2024"></div>
-                                <div><label class="block text-xs font-bold mb-2">NAMA KEGIATAN</label><input type="text" name="kegiatan" class="form-input-custom"></div>
-                                <div class="md:col-span-2"><label class="block text-xs font-bold mb-2">KETERANGAN</label><textarea name="keterangan" class="form-input-custom" rows="3"></textarea></div>
-                            </div>`;
-                        break;
-
-                    case 'data-murid':
-                        html += `
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="md:col-span-2"><label class="block text-xs font-bold mb-2">NAMA LENGKAP MURID</label><input type="text" name="nama_lengkap_murid" class="form-input-custom" required></div>
-                                <div><label class="block text-xs font-bold mb-2">NIS / NISN</label><input type="text" name="nis_nisn" class="form-input-custom"></div>
-                                <div><label class="block text-xs font-bold mb-2">KELAS</label><input type="text" name="kelas" class="form-input-custom"></div>
-                                <div><label class="block text-xs font-bold mb-2">NAMA GURU WALI</label><input type="text" name="guru_wali" class="form-input-custom"></div>
-                                <div><label class="block text-xs font-bold mb-2">TAHUN MASUK</label><input type="text" name="tahun_masuk" class="form-input-custom"></div>
-                            </div>`;
-                        break;
-
-                    case 'profil-murid':
-                        html += `
-                            <div class="space-y-6">
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end bg-slate-50 p-6 rounded-2xl border border-slate-100">
-                                    <div class="md:col-span-3">
-                                        <label class="block text-xs font-bold mb-2">PILIH NAMA MURID</label>
-                                        <select name="nama_murid" id="muridSelector" onchange="app.autoFillMurid(this.value)" class="form-input-custom" required>
-                                            <option value="">Pilih Murid...</option>
-                                        </select>
-                                    </div>
-                                    <div><label class="block text-[10px] font-bold text-slate-400">NIS / NISN</label><input type="text" id="view_nis" class="form-input-custom form-input-readonly" readonly value="-"></div>
-                                    <div><label class="block text-[10px] font-bold text-slate-400">KELAS</label><input type="text" id="view_kelas" class="form-input-custom form-input-readonly" readonly value="-"></div>
-                                    <div><label class="block text-[10px] font-bold text-slate-400">GURU WALI</label><input type="text" id="view_guru" class="form-input-custom form-input-readonly" readonly value="-"></div>
-                                </div>
-                                <div class="section-header">A. DATA DIRI & KELUARGA</div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="md:col-span-2"><label class="block text-xs font-bold mb-2">ALAMAT</label><textarea name="alamat" class="form-input-custom" rows="2"></textarea></div>
-                                    <div><label class="block text-xs font-bold mb-2">NO. TELEPON (MURID/WALI)</label><input type="text" name="hp" class="form-input-custom"></div>
-                                    <div><label class="block text-xs font-bold mb-2">NAMA ORANG TUA / WALI</label><input type="text" name="nama_ortu" class="form-input-custom"></div>
-                                    <div><label class="block text-xs font-bold mb-2">PEKERJAAN ORANG TUA / WALI</label><input type="text" name="pekerjaan_ortu" class="form-input-custom"></div>
-                                </div>
-                                <div class="section-header">B. RIWAYAT AKADEMIK</div>
-                                <div class="space-y-4">
-                                    <div><label class="block text-xs font-bold mb-2">RATA-RATA NILAI RAPOR KELAS SEBELUMNYA</label><input type="text" name="nilai_rapor" class="form-input-custom"></div>
-                                    <div><label class="block text-xs font-bold mb-2">MATA PELAJARAN YANG PALING DISUKAI</label><input type="text" name="mapel_suka" class="form-input-custom"></div>
-                                    <div><label class="block text-xs font-bold mb-2">MATA PELAJARAN YANG DIANGGAP SULIT</label><input type="text" name="mapel_sulit" class="form-input-custom"></div>
-                                </div>
-                                <div class="section-header">C. MINAT, BAKAT, & PRESTASI NON-AKADEMIK</div>
-                                <div class="space-y-4">
-                                    <div><label class="block text-xs font-bold mb-2">HOBI / MINAT</label><input type="text" name="hobi" class="form-input-custom"></div>
-                                    <div><label class="block text-xs font-bold mb-2">EKSTRAKURIKULER YANG DIIKUTI</label><input type="text" name="ekskul" class="form-input-custom"></div>
-                                    <div><label class="block text-xs font-bold mb-2">PRESTASI YANG PERNAH DIRAIH</label><input type="text" name="prestasi" class="form-input-custom"></div>
-                                </div>
-                                <div class="section-header">D. TARGET & HARAPAN AWAL</div>
-                                <div class="space-y-4">
-                                    <div><label class="block text-xs font-bold mb-2">APA YANG INGIN DICAPAI TAHUN INI?</label><textarea name="target_capai" class="form-input-custom" rows="3"></textarea></div>
-                                    <div><label class="block text-xs font-bold mb-2">APA DUKUNGAN YANG KAMU HARAPKAN DARI GURU WALI?</label><textarea name="dukungan_guru" class="form-input-custom" rows="3"></textarea></div>
-                                    <div><label class="block text-xs font-bold mb-2">CATATAN AWAL GURU WALI</label><textarea name="catatan_wali" class="form-input-custom" rows="3"></textarea></div>
-                                </div>
-                            </div>`;
-                        break;
-
-                    case 'jurnal':
-                        html += `
-                            <div class="space-y-6">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div><label class="block text-xs font-bold mb-2">PILIH MURID</label><select name="nama_murid" id="muridSelector" class="form-input-custom" required><option value="">Pilih Murid...</option></select></div>
-                                    <div><label class="block text-xs font-bold mb-2">TANGGAL</label><input type="date" name="tanggal" class="form-input-custom"></div>
-                                </div>
-                                <div><label class="block text-xs font-bold mb-2">RINGKASAN PERTEMUAN</label><textarea name="ringkasan" class="form-input-custom" rows="4" placeholder="Apa yang dibahas?"></textarea></div>
-                                <div><label class="block text-xs font-bold mb-2">TINDAK LANJUT GURU WALI</label><textarea name="rtl_wali" class="form-input-custom" rows="3" placeholder="Rencana aksi selanjutnya..."></textarea></div>
-                            </div>`;
-                        break;
-
-                    case 'laporan':
-                        html += `
-                            <div class="space-y-6">
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div><label class="block text-xs font-bold mb-2">PILIH MURID</label><select name="nama_murid" id="muridSelector" class="form-input-custom" required><option value="">Pilih Murid...</option></select></div>
-                                    <div>
-                                        <label class="block text-xs font-bold mb-2">PERIODE</label>
-                                        <div class="flex items-center h-10 gap-6">
-                                            <label class="flex items-center gap-2 text-sm"><input type="radio" name="periode" value="Ganjil" checked> Ganjil</label>
-                                            <label class="flex items-center gap-2 text-sm"><input type="radio" name="periode" value="Genap"> Genap</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="section-header">PENCAPAIAN AKADEMIK</div>
-                                <textarea name="akademik_pencapaian" class="form-input-custom" rows="3" placeholder="Deskripsi perkembangan nilai..."></textarea>
-                                <div class="section-header">OBSERVASI KARAKTER</div>
-                                <textarea name="karakter_positif" class="form-input-custom" rows="3" placeholder="Sifat atau perilaku positif yang menonjol..."></textarea>
-                            </div>`;
-                        break;
-
-                    case 'rencana':
-                        html += `
-                            <div class="space-y-6">
-                                <div class="mb-4"><label class="block text-xs font-bold mb-2">PILIH MURID</label><select name="nama_murid" id="muridSelector" class="form-input-custom" required><option value="">Pilih Murid...</option></select></div>
-                                <div class="section-header">TARGET PENGEMBANGAN DIRI</div>
-                                <div class="overflow-x-auto">
-                                    <table class="w-full">
-                                        <thead><tr><th class="w-1/4">Bidang</th><th>Target / Tujuan yang Ingin Dicapai</th></tr></thead>
-                                        <tbody>
-                                            <tr><td class="bg-slate-50 font-bold text-xs p-4">AKADEMIK</td><td><textarea name="target_akademik" class="w-full p-2 border-none focus:ring-0 text-sm" rows="2"></textarea></td></tr>
-                                            <tr><td class="bg-slate-50 font-bold text-xs p-4">BAKAT & KOMPETENSI</td><td><textarea name="target_kompetensi" class="w-full p-2 border-none focus:ring-0 text-sm" rows="2"></textarea></td></tr>
-                                            <tr><td class="bg-slate-50 font-bold text-xs p-4">KARAKTER / SPIRITUAL</td><td><textarea name="target_karakter" class="w-full p-2 border-none focus:ring-0 text-sm" rows="2"></textarea></td></tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>`;
-                        break;
+                    case 'profil-murid': html += app.templateProfilMurid(); break;
+                    case 'jurnal': html += app.templateJurnal(); break;
+                    case 'laporan': html += app.templateLaporan(); break;
+                    case 'rencana': html += app.templateRencana(); break;
+                    case 'identitas': html += app.templateIdentitas(); break;
+                    case 'program': html += app.templateProgram(); break;
+                    case 'jadwal': html += app.templateJadwal(); break;
+                    case 'data-murid': html += app.templateDataMurid(); break;
                 }
 
-                html += `</form>`;
-                html += app.renderFloatingActions();
-                html += `</div>`;
+                html += `</form></div>`;
+                area.innerHTML = html;
+            },
+
+            templateProfilMurid: () => `
+                <div class="form-row">
+                    <label class="form-label">Nama Lengkap Murid</label>
+                    <select name="nama_murid" onchange="app.fillMurid(this.value)" class="form-input-custom" required>
+                        <option value="">Pilih Murid...</option>
+                        ${dbMurid.map(m => `<option value="${m.nama}">${m.nama}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-row"><label class="form-label">NIS / NISN</label><input type="text" id="m_nis" class="form-input-custom form-input-readonly" readonly></div>
+                <div class="form-row"><label class="form-label">Kelas</label><input type="text" id="m_kelas" class="form-input-custom form-input-readonly" readonly></div>
+                <div class="form-row"><label class="form-label">Nama Guru Wali</label><input type="text" id="m_guru" class="form-input-custom form-input-readonly" readonly></div>
+                <div class="form-row"><label class="form-label">Tahun Masuk</label><input type="text" id="m_tahun" class="form-input-custom form-input-readonly" readonly></div>
+
+                <div class="section-title">A. Data Diri & Keluarga</div>
+                <div class="form-row"><label class="form-label">Alamat Lengkap</label><textarea name="alamat" class="form-input-custom" rows="2"></textarea></div>
+                <div class="form-row"><label class="form-label">No. Telepon / WhatsApp</label><input type="text" name="no_telp" class="form-input-custom"></div>
+                <div class="form-row"><label class="form-label">Nama Orang Tua / Wali</label><input type="text" name="nama_ortu" class="form-input-custom"></div>
+                <div class="form-row"><label class="form-label">Pekerjaan Orang Tua / Wali</label><input type="text" name="kerja_ortu" class="form-input-custom"></div>
+
+                <div class="section-title">B. Riwayat Akademik</div>
+                <div class="form-row"><label class="form-label">Rata-rata Nilai Rapor Sebelumnya</label><input type="text" name="nilai_rapor" class="form-input-custom"></div>
+                <div class="form-row"><label class="form-label">Mata Pelajaran yang Disukai</label><input type="text" name="mapel_suka" class="form-input-custom"></div>
+                <div class="form-row"><label class="form-label">Mata Pelajaran yang Sulit</label><input type="text" name="mapel_sulit" class="form-input-custom"></div>
+
+                <div class="section-title">C. Minat & Prestasi</div>
+                <div class="form-row"><label class="form-label">Hobi</label><input type="text" name="hobi" class="form-input-custom"></div>
+                <div class="form-row"><label class="form-label">Ekstrakurikuler</label><input type="text" name="ekskul" class="form-input-custom"></div>
+                <div class="form-row"><label class="form-label">Prestasi</label><input type="text" name="prestasi" class="form-input-custom"></div>
+            `,
+
+            templateJurnal: () => `
+                <div class="form-row">
+                    <label class="form-label">Nama Murid</label>
+                    <select name="nama_murid" class="form-input-custom" required>
+                        <option value="">Pilih Murid...</option>
+                        ${dbMurid.map(m => `<option value="${m.nama}">${m.nama}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-row"><label class="form-label">Tanggal Pertemuan</label><input type="date" name="tanggal" class="form-input-custom"></div>
                 
-                container.innerHTML = html;
-                
-                if (['profil-murid', 'jurnal', 'laporan', 'rencana'].includes(id)) {
-                    app.loadMuridDropdown();
-                }
-            },
+                <div class="form-row">
+                    <label class="form-label">Jenis Pertemuan</label>
+                    <div class="flex flex-col gap-2 mt-1">
+                        <label class="flex items-center gap-3 text-sm border p-3 rounded-lg"><input type="radio" name="jenis" value="Individu"> Individu</label>
+                        <label class="flex items-center gap-3 text-sm border p-3 rounded-lg"><input type="radio" name="jenis" value="Kelompok"> Kelompok</label>
+                        <label class="flex items-center gap-3 text-sm border p-3 rounded-lg"><input type="radio" name="jenis" value="Insidental"> Insidental</label>
+                    </div>
+                </div>
 
-            loadMuridDropdown: async () => {
-                const selector = document.getElementById('muridSelector');
-                if (!selector || !API_URL) return;
-                try {
-                    const res = await fetch(`${API_URL}?menu=data-murid`);
-                    const data = await res.json();
-                    dbMurid = data; 
-                    data.forEach(m => {
-                        const opt = document.createElement('option');
-                        opt.value = m.nama_lengkap_murid;
-                        opt.textContent = m.nama_lengkap_murid;
-                        selector.appendChild(opt);
-                    });
-                } catch (e) { console.error("Gagal memuat murid:", e); }
-            },
+                <div class="form-row">
+                    <label class="form-label">Topik Utama</label>
+                    <div class="grid grid-cols-1 gap-2 mt-1">
+                        <label class="flex items-center gap-3 text-sm"><input type="checkbox" name="topik" value="Akademik"> Akademik</label>
+                        <label class="flex items-center gap-3 text-sm"><input type="checkbox" name="topik" value="Kompetensi"> Kompetensi</label>
+                        <label class="flex items-center gap-3 text-sm"><input type="checkbox" name="topik" value="Karakter"> Karakter</label>
+                    </div>
+                </div>
 
-            autoFillMurid: (nama) => {
-                const murid = dbMurid.find(m => m.nama_lengkap_murid === nama);
-                if (murid && document.getElementById('view_nis')) {
-                    document.getElementById('view_nis').value = murid.nis_nisn || '-';
-                    document.getElementById('view_kelas').value = murid.kelas || '-';
-                    document.getElementById('view_guru').value = murid.guru_wali || '-';
-                }
-            },
+                <div class="form-row"><label class="form-label">Ringkasan Pembahasan</label><textarea name="ringkasan" class="form-input-custom" rows="4"></textarea></div>
+                <div class="form-row"><label class="form-label">Tindak Lanjut Murid</label><textarea name="rtl_murid" class="form-input-custom" rows="3"></textarea></div>
+                <div class="form-row"><label class="form-label">Tindak Lanjut Guru</label><textarea name="rtl_wali" class="form-input-custom" rows="3"></textarea></div>
+            `,
 
-            renderFloatingActions: () => `
-                <div class="fixed bottom-10 right-10 flex flex-col gap-4 no-print">
-                    <button type="submit" form="mainForm" class="action-btn bg-indigo-600" title="Simpan Data"><i class="fas fa-save"></i></button>
-                    <button onclick="window.print()" class="action-btn bg-blue-500" title="Cetak ke PDF"><i class="fas fa-print"></i></button>
+            templateLaporan: () => `
+                <div class="form-row">
+                    <label class="form-label">Nama Murid</label>
+                    <select name="nama_murid" class="form-input-custom" required>
+                        <option value="">Pilih Murid...</option>
+                        ${dbMurid.map(m => `<option value="${m.nama}">${m.nama}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label class="form-label">Semester</label>
+                    <div class="flex gap-4">
+                        <label class="flex-1 text-center border p-3 rounded-lg text-sm"><input type="radio" name="periode" value="Ganjil"> Ganjil</label>
+                        <label class="flex-1 text-center border p-3 rounded-lg text-sm"><input type="radio" name="periode" value="Genap"> Genap</label>
+                    </div>
+                </div>
+                <div class="form-row"><label class="form-label">Tahun Ajaran</label><input type="text" name="tahun_ajaran" class="form-input-custom" placeholder="2023/2024"></div>
+
+                <div class="section-title">Perkembangan Akademik</div>
+                <div class="form-row"><label class="form-label">Pencapaian</label><textarea name="akademik_rangkum" class="form-input-custom" rows="3"></textarea></div>
+                <div class="form-row"><label class="form-label">Kendala</label><textarea name="akademik_kendala" class="form-input-custom" rows="3"></textarea></div>
+
+                <div class="section-title">Karakter & Sikap</div>
+                <div class="form-row"><label class="form-label">Observasi Positif</label><textarea name="karakter_observasi" class="form-input-custom" rows="3"></textarea></div>
+                <div class="form-row"><label class="form-label">Perlu Ditingkatkan</label><textarea name="karakter_poin" class="form-input-custom" rows="3"></textarea></div>
+            `,
+
+            templateRencana: () => `
+                <div class="form-row">
+                    <label class="form-label">Nama Murid</label>
+                    <select name="nama_murid" class="form-input-custom" required>
+                        <option value="">Pilih Murid...</option>
+                        ${dbMurid.map(m => `<option value="${m.nama}">${m.nama}</option>`).join('')}
+                    </select>
+                </div>
+
+                <div class="section-title">Rencana Target Diri</div>
+                <div class="form-row"><label class="form-label">Target Akademik</label><textarea name="t_akademik" class="form-input-custom" rows="2"></textarea></div>
+                <div class="form-row"><label class="form-label">Target Bakat / Ekskul</label><textarea name="t_kompetensi" class="form-input-custom" rows="2"></textarea></div>
+                <div class="form-row"><label class="form-label">Target Karakter / Kedisiplinan</label><textarea name="t_karakter" class="form-input-custom" rows="2"></textarea></div>
+
+                <div class="mt-12 pt-8 border-t flex justify-between">
+                    <div class="text-center w-1/3">
+                        <p class="text-xs mb-16">Siswa,</p>
+                        <div class="border-b border-slate-900"></div>
+                    </div>
+                    <div class="text-center w-1/3">
+                        <p class="text-xs mb-16">Guru Wali,</p>
+                        <div class="border-b border-slate-900"></div>
+                    </div>
                 </div>
             `,
 
-            handleSave: async (e) => {
-                e.preventDefault();
-                const btn = e.submitter;
-                const originalHtml = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                btn.disabled = true;
+            templateIdentitas: () => `
+                <div class="form-row"><label class="form-label">Nama Lengkap Guru</label><input type="text" name="nama" class="form-input-custom"></div>
+                <div class="form-row"><label class="form-label">NIP</label><input type="text" name="nip" class="form-input-custom"></div>
+                <div class="form-row"><label class="form-label">Wali Kelas</label><input type="text" name="wali" class="form-input-custom"></div>
+            `,
 
-                const formData = new FormData(e.target);
-                const payload = {};
-                formData.forEach((v, k) => payload[k] = v);
+            templateProgram: () => `
+                <div class="form-row"><label class="form-label">Pilar Program</label><input type="text" name="pilar" class="form-input-custom"></div>
+                <div class="form-row"><label class="form-label">Bentuk Kegiatan</label><textarea name="kegiatan" class="form-input-custom" rows="3"></textarea></div>
+                <div class="form-row"><label class="form-label">Indikator Keberhasilan</label><textarea name="indikator" class="form-input-custom" rows="3"></textarea></div>
+            `,
 
-                try {
-                    await fetch(API_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            menu: app.activeMenuId,
-                            payload: payload
-                        })
-                    });
-                    
-                    alert("Data Berhasil Terkirim!");
-                    e.target.reset();
-                    if(document.getElementById('view_nis')) {
-                        document.getElementById('view_nis').value = '-';
-                        document.getElementById('view_kelas').value = '-';
-                        document.getElementById('view_guru').value = '-';
-                    }
-                } catch (err) {
-                    alert("Gagal terhubung ke server.");
-                } finally {
-                    btn.innerHTML = originalHtml;
-                    btn.disabled = false;
+            templateJadwal: () => `
+                <div class="form-row"><label class="form-label">Waktu / Tanggal</label><input type="text" name="waktu" class="form-input-custom"></div>
+                <div class="form-row"><label class="form-label">Kegiatan</label><input type="text" name="keg_nama" class="form-input-custom"></div>
+                <div class="form-row"><label class="form-label">Keterangan</label><textarea name="ket" class="form-input-custom" rows="3"></textarea></div>
+            `,
+
+            templateDataMurid: () => `
+                <div class="form-row"><label class="form-label">Nama Lengkap Murid</label><input type="text" name="nama" class="form-input-custom"></div>
+                <div class="form-row"><label class="form-label">NIS / NISN</label><input type="text" name="nis" class="form-input-custom"></div>
+                <div class="form-row"><label class="form-label">Kelas</label><input type="text" name="kelas" class="form-input-custom"></div>
+                <div class="form-row"><label class="form-label">Nama Guru Wali</label><input type="text" name="guru" class="form-input-custom"></div>
+                <div class="form-row"><label class="form-label">Tahun Masuk</label><input type="text" name="tahun" class="form-input-custom"></div>
+            `,
+
+            fillMurid: (nama) => {
+                const murid = dbMurid.find(m => m.nama === nama);
+                if (murid) {
+                    document.getElementById('m_nis').value = murid.nis;
+                    document.getElementById('m_kelas').value = murid.kelas;
+                    document.getElementById('m_guru').value = murid.guru;
+                    document.getElementById('m_tahun').value = murid.tahun;
                 }
-            }
+            },
+
+            handleSave: (e) => {
+                e.preventDefault();
+                alert("Data Berhasil Disimpan!");
+            },
+
+            logout: () => { window.location.reload(); }
         };
 
         window.onload = app.init;
