@@ -17,7 +17,7 @@
                     fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
                     colors: {
                         navy: { 900: '#1e293b', 800: '#334155', DEFAULT: '#1a2233' },
-                        brand: { blue: '#4f46e5', light: '#f1f5f9' }
+                        brand: { blue: '#2563eb', light: '#f1f5f9' }
                     }
                 }
             }
@@ -28,12 +28,16 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .nav-item-active { background-color: #2563eb !important; color: white !important; border-radius: 8px; }
-        .form-input-custom { border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem 1rem; transition: all 0.2s; width: 100%; background-color: #fff; }
+        .form-input-custom { border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.75rem 1rem; transition: all 0.2s; width: 100%; background-color: #fff; font-size: 0.875rem; }
         .form-input-custom:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
-        .action-btn { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.15); color: white; }
+        .form-input-readonly { background-color: #f8fafc; cursor: not-allowed; color: #64748b; border-color: #e2e8f0; }
+        .action-btn { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.15); color: white; border: none; cursor: pointer; }
         .action-btn:hover { transform: scale(1.1); }
-        .section-header { font-size: 0.85rem; font-weight: 800; color: #1e293b; letter-spacing: 0.05em; margin: 2rem 0 1rem 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.5rem; text-transform: uppercase; }
-        @media print { .no-print { display: none !important; } }
+        .section-header { font-size: 0.85rem; font-weight: 800; color: #1e293b; letter-spacing: 0.05em; margin: 2.5rem 0 1.5rem 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background-color: #f8fafc; padding: 0.75rem; border: 1px solid #e2e8f0; text-align: left; font-size: 0.75rem; }
+        td { padding: 0.5rem; border: 1px solid #e2e8f0; }
+        @media print { .no-print { display: none !important; } .print-only { display: block !important; } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans h-screen flex overflow-hidden">
@@ -51,9 +55,8 @@
         </div>
     </div>
 
-    <!-- MAIN APP CONTAINER -->
+    <!-- MAIN APP -->
     <div id="appContainer" class="flex w-full h-full opacity-0 transition-opacity duration-500">
-        <!-- Sidebar -->
         <aside id="sidebar" class="bg-[#1e293b] text-slate-300 w-64 flex-shrink-0 flex flex-col z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
             <div class="p-8 text-white font-bold text-lg leading-tight uppercase tracking-widest">ADMINISTRASI GURU WALI</div>
             <nav id="navLinks" class="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar"></nav>
@@ -64,20 +67,17 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="flex-1 flex flex-col min-w-0 bg-white md:bg-slate-50">
             <header class="md:hidden bg-white border-b p-4 flex justify-between items-center no-print">
                 <span class="font-bold uppercase text-xs tracking-widest">Menu</span>
                 <button onclick="app.toggleSidebar()" class="text-2xl"><i class="fas fa-bars"></i></button>
             </header>
-            <div id="contentArea" class="flex-1 overflow-y-auto p-4 md:p-12 relative">
-                <!-- Content will be injected here -->
-            </div>
+            <div id="contentArea" class="flex-1 overflow-y-auto p-4 md:p-12 relative"></div>
         </main>
     </div>
 
     <script>
-        // MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI
+        // API URL 
         const API_URL = "https://script.google.com/macros/s/AKfycbyEF6TPuArduYhyxQB5_t2_RulNyuxVIvYjq3mVio4r9zURc49THfcE24FAWvv7wo5f/exec"; 
 
         const CONFIG = {
@@ -94,7 +94,7 @@
             ]
         };
 
-        let cachedMurid = [];
+        let dbMurid = []; 
 
         const app = {
             activeMenuId: null,
@@ -140,102 +140,195 @@
                 document.querySelectorAll('#navLinks button').forEach(b => b.classList.remove('nav-item-active'));
                 const navBtn = document.getElementById(`nav-${id}`);
                 if(navBtn) navBtn.classList.add('nav-item-active');
-                
                 if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
-                
                 app.renderPage(id);
             },
 
             renderPage: (id) => {
                 const container = document.getElementById('contentArea');
-                let html = `<div class="max-w-5xl mx-auto bg-white p-6 md:p-14 rounded-3xl shadow-sm border border-slate-100 min-h-full relative">`;
-                
                 const menu = CONFIG.MENUS.find(m => m.id === id);
+                
+                let html = `<div class="max-w-4xl mx-auto bg-white p-6 md:p-14 rounded-3xl shadow-sm border border-slate-100 min-h-full">`;
                 html += `<div class="text-center mb-10"><h1 class="text-3xl font-bold text-slate-800 uppercase tracking-tight">${menu.label}</h1></div>`;
-                html += `<form id="mainForm" onsubmit="app.handleSave(event)">`;
+                html += `<form id="mainForm" onsubmit="app.handleSave(event)" class="space-y-6">`;
 
-                // Logic Form Per Halaman
-                if (id === 'laporan' || id === 'rencana' || id === 'jurnal' || id === 'profil-murid') {
-                    html += `
-                        <div class="space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                                <label class="md:col-span-3 text-sm font-semibold">Nama Murid</label>
-                                <select name="nama_murid" id="muridSelector" class="md:col-span-9 form-input-custom" required>
-                                    <option value="">Pilih Murid...</option>
-                                </select>
-                            </div>
-                    `;
+                switch(id) {
+                    case 'identitas':
+                        html += `
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div><label class="block text-xs font-bold mb-2">NAMA LENGKAP GURU</label><input type="text" name="nama_lengkap" class="form-input-custom"></div>
+                                <div><label class="block text-xs font-bold mb-2">NIP</label><input type="text" name="nip" class="form-input-custom"></div>
+                                <div class="md:col-span-2"><label class="block text-xs font-bold mb-2">WALI KELAS</label><input type="text" name="wali_kelas" class="form-input-custom"></div>
+                            </div>`;
+                        break;
+
+                    case 'program':
+                        html += `
+                            <div class="space-y-4">
+                                <div><label class="block text-xs font-bold mb-2">PILAR PROGRAM</label><input type="text" name="pilar_program" class="form-input-custom"></div>
+                                <div><label class="block text-xs font-bold mb-2">BENTUK KEGIATAN</label><textarea name="bentuk_kegiatan" class="form-input-custom" rows="3"></textarea></div>
+                                <div><label class="block text-xs font-bold mb-2">INDIKATOR KEBERHASILAN</label><textarea name="indikator_keberhasilan" class="form-input-custom" rows="3"></textarea></div>
+                            </div>`;
+                        break;
+
+                    case 'jadwal':
+                        html += `
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div><label class="block text-xs font-bold mb-2">WAKTU / TANGGAL (TEKS)</label><input type="text" name="waktu" class="form-input-custom" placeholder="Contoh: Senin, 12 Feb 2024"></div>
+                                <div><label class="block text-xs font-bold mb-2">NAMA KEGIATAN</label><input type="text" name="kegiatan" class="form-input-custom"></div>
+                                <div class="md:col-span-2"><label class="block text-xs font-bold mb-2">KETERANGAN</label><textarea name="keterangan" class="form-input-custom" rows="3"></textarea></div>
+                            </div>`;
+                        break;
+
+                    case 'data-murid':
+                        html += `
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="md:col-span-2"><label class="block text-xs font-bold mb-2">NAMA LENGKAP MURID</label><input type="text" name="nama_lengkap_murid" class="form-input-custom" required></div>
+                                <div><label class="block text-xs font-bold mb-2">NIS / NISN</label><input type="text" name="nis_nisn" class="form-input-custom"></div>
+                                <div><label class="block text-xs font-bold mb-2">KELAS</label><input type="text" name="kelas" class="form-input-custom"></div>
+                                <div><label class="block text-xs font-bold mb-2">NAMA GURU WALI</label><input type="text" name="guru_wali" class="form-input-custom"></div>
+                                <div><label class="block text-xs font-bold mb-2">TAHUN MASUK</label><input type="text" name="tahun_masuk" class="form-input-custom"></div>
+                            </div>`;
+                        break;
+
+                    case 'profil-murid':
+                        html += `
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                                    <div class="md:col-span-3">
+                                        <label class="block text-xs font-bold mb-2">PILIH NAMA MURID</label>
+                                        <select name="nama_murid" id="muridSelector" onchange="app.autoFillMurid(this.value)" class="form-input-custom" required>
+                                            <option value="">Pilih Murid...</option>
+                                        </select>
+                                    </div>
+                                    <div><label class="block text-[10px] font-bold text-slate-400">NIS / NISN</label><input type="text" id="view_nis" class="form-input-custom form-input-readonly" readonly value="-"></div>
+                                    <div><label class="block text-[10px] font-bold text-slate-400">KELAS</label><input type="text" id="view_kelas" class="form-input-custom form-input-readonly" readonly value="-"></div>
+                                    <div><label class="block text-[10px] font-bold text-slate-400">GURU WALI</label><input type="text" id="view_guru" class="form-input-custom form-input-readonly" readonly value="-"></div>
+                                </div>
+                                <div class="section-header">A. DATA DIRI & KELUARGA</div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="md:col-span-2"><label class="block text-xs font-bold mb-2">ALAMAT</label><textarea name="alamat" class="form-input-custom" rows="2"></textarea></div>
+                                    <div><label class="block text-xs font-bold mb-2">NO. TELEPON (MURID/WALI)</label><input type="text" name="hp" class="form-input-custom"></div>
+                                    <div><label class="block text-xs font-bold mb-2">NAMA ORANG TUA / WALI</label><input type="text" name="nama_ortu" class="form-input-custom"></div>
+                                    <div><label class="block text-xs font-bold mb-2">PEKERJAAN ORANG TUA / WALI</label><input type="text" name="pekerjaan_ortu" class="form-input-custom"></div>
+                                </div>
+                                <div class="section-header">B. RIWAYAT AKADEMIK</div>
+                                <div class="space-y-4">
+                                    <div><label class="block text-xs font-bold mb-2">RATA-RATA NILAI RAPOR KELAS SEBELUMNYA</label><input type="text" name="nilai_rapor" class="form-input-custom"></div>
+                                    <div><label class="block text-xs font-bold mb-2">MATA PELAJARAN YANG PALING DISUKAI</label><input type="text" name="mapel_suka" class="form-input-custom"></div>
+                                    <div><label class="block text-xs font-bold mb-2">MATA PELAJARAN YANG DIANGGAP SULIT</label><input type="text" name="mapel_sulit" class="form-input-custom"></div>
+                                </div>
+                                <div class="section-header">C. MINAT, BAKAT, & PRESTASI NON-AKADEMIK</div>
+                                <div class="space-y-4">
+                                    <div><label class="block text-xs font-bold mb-2">HOBI / MINAT</label><input type="text" name="hobi" class="form-input-custom"></div>
+                                    <div><label class="block text-xs font-bold mb-2">EKSTRAKURIKULER YANG DIIKUTI</label><input type="text" name="ekskul" class="form-input-custom"></div>
+                                    <div><label class="block text-xs font-bold mb-2">PRESTASI YANG PERNAH DIRAIH</label><input type="text" name="prestasi" class="form-input-custom"></div>
+                                </div>
+                                <div class="section-header">D. TARGET & HARAPAN AWAL</div>
+                                <div class="space-y-4">
+                                    <div><label class="block text-xs font-bold mb-2">APA YANG INGIN DICAPAI TAHUN INI?</label><textarea name="target_capai" class="form-input-custom" rows="3"></textarea></div>
+                                    <div><label class="block text-xs font-bold mb-2">APA DUKUNGAN YANG KAMU HARAPKAN DARI GURU WALI?</label><textarea name="dukungan_guru" class="form-input-custom" rows="3"></textarea></div>
+                                    <div><label class="block text-xs font-bold mb-2">CATATAN AWAL GURU WALI</label><textarea name="catatan_wali" class="form-input-custom" rows="3"></textarea></div>
+                                </div>
+                            </div>`;
+                        break;
+
+                    case 'jurnal':
+                        html += `
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label class="block text-xs font-bold mb-2">PILIH MURID</label><select name="nama_murid" id="muridSelector" class="form-input-custom" required><option value="">Pilih Murid...</option></select></div>
+                                    <div><label class="block text-xs font-bold mb-2">TANGGAL</label><input type="date" name="tanggal" class="form-input-custom"></div>
+                                </div>
+                                <div><label class="block text-xs font-bold mb-2">RINGKASAN PERTEMUAN</label><textarea name="ringkasan" class="form-input-custom" rows="4" placeholder="Apa yang dibahas?"></textarea></div>
+                                <div><label class="block text-xs font-bold mb-2">TINDAK LANJUT GURU WALI</label><textarea name="rtl_wali" class="form-input-custom" rows="3" placeholder="Rencana aksi selanjutnya..."></textarea></div>
+                            </div>`;
+                        break;
+
+                    case 'laporan':
+                        html += `
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label class="block text-xs font-bold mb-2">PILIH MURID</label><select name="nama_murid" id="muridSelector" class="form-input-custom" required><option value="">Pilih Murid...</option></select></div>
+                                    <div>
+                                        <label class="block text-xs font-bold mb-2">PERIODE</label>
+                                        <div class="flex items-center h-10 gap-6">
+                                            <label class="flex items-center gap-2 text-sm"><input type="radio" name="periode" value="Ganjil" checked> Ganjil</label>
+                                            <label class="flex items-center gap-2 text-sm"><input type="radio" name="periode" value="Genap"> Genap</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="section-header">PENCAPAIAN AKADEMIK</div>
+                                <textarea name="akademik_pencapaian" class="form-input-custom" rows="3" placeholder="Deskripsi perkembangan nilai..."></textarea>
+                                <div class="section-header">OBSERVASI KARAKTER</div>
+                                <textarea name="karakter_positif" class="form-input-custom" rows="3" placeholder="Sifat atau perilaku positif yang menonjol..."></textarea>
+                            </div>`;
+                        break;
+
+                    case 'rencana':
+                        html += `
+                            <div class="space-y-6">
+                                <div class="mb-4"><label class="block text-xs font-bold mb-2">PILIH MURID</label><select name="nama_murid" id="muridSelector" class="form-input-custom" required><option value="">Pilih Murid...</option></select></div>
+                                <div class="section-header">TARGET PENGEMBANGAN DIRI</div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full">
+                                        <thead><tr><th class="w-1/4">Bidang</th><th>Target / Tujuan yang Ingin Dicapai</th></tr></thead>
+                                        <tbody>
+                                            <tr><td class="bg-slate-50 font-bold text-xs p-4">AKADEMIK</td><td><textarea name="target_akademik" class="w-full p-2 border-none focus:ring-0 text-sm" rows="2"></textarea></td></tr>
+                                            <tr><td class="bg-slate-50 font-bold text-xs p-4">BAKAT & KOMPETENSI</td><td><textarea name="target_kompetensi" class="w-full p-2 border-none focus:ring-0 text-sm" rows="2"></textarea></td></tr>
+                                            <tr><td class="bg-slate-50 font-bold text-xs p-4">KARAKTER / SPIRITUAL</td><td><textarea name="target_karakter" class="w-full p-2 border-none focus:ring-0 text-sm" rows="2"></textarea></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>`;
+                        break;
                 }
 
-                if (id === 'laporan') {
-                    html += `
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                            <label class="md:col-span-3 text-sm font-semibold">Periode</label>
-                            <div class="md:col-span-9 flex gap-4">
-                                <label class="flex items-center gap-2"><input type="radio" name="periode" value="Ganjil"> Ganjil</label>
-                                <label class="flex items-center gap-2"><input type="radio" name="periode" value="Genap"> Genap</label>
-                            </div>
-                        </div>
-                        <div class="section-header">A. Perkembangan Akademik</div>
-                        <textarea name="akademik_pencapaian" class="form-input-custom mb-4" placeholder="Rangkuman Pencapaian..." rows="3"></textarea>
-                        <div class="section-header">B. Karakter</div>
-                        <textarea name="karakter_positif" class="form-input-custom" placeholder="Observasi Sikap Positif..." rows="3"></textarea>
-                    `;
-                } else if (id === 'rencana') {
-                    html += `
-                        <div class="section-header">Target Saya Semester Ini</div>
-                        <div class="space-y-4">
-                            <input type="text" name="target_akademik" class="form-input-custom" placeholder="Target Akademik">
-                            <input type="text" name="target_karakter" class="form-input-custom" placeholder="Target Karakter">
-                        </div>
-                    `;
-                } else if (id === 'data-murid') {
-                    html += `
-                        <div class="space-y-4">
-                            <input type="text" name="nama_lengkap_murid" class="form-input-custom" placeholder="Nama Lengkap Murid" required>
-                            <input type="text" name="nis_nisn" class="form-input-custom" placeholder="NIS / NISN">
-                            <input type="text" name="kelas" class="form-input-custom" placeholder="Kelas">
-                        </div>
-                    `;
-                } else {
-                    html += `<p class="text-center text-slate-400 italic py-10">Form ${menu.label} siap diisi.</p>`;
-                }
-
-                html += `</div></form>`;
+                html += `</form>`;
                 html += app.renderFloatingActions();
                 html += `</div>`;
                 
                 container.innerHTML = html;
-                if (id === 'laporan' || id === 'rencana' || id === 'jurnal' || id === 'profil-murid') app.loadMuridDropdown();
+                
+                if (['profil-murid', 'jurnal', 'laporan', 'rencana'].includes(id)) {
+                    app.loadMuridDropdown();
+                }
             },
 
             loadMuridDropdown: async () => {
-                if (!API_URL) return;
                 const selector = document.getElementById('muridSelector');
+                if (!selector || !API_URL) return;
                 try {
                     const res = await fetch(`${API_URL}?menu=data-murid`);
                     const data = await res.json();
-                    cachedMurid = data;
+                    dbMurid = data; 
                     data.forEach(m => {
                         const opt = document.createElement('option');
                         opt.value = m.nama_lengkap_murid;
                         opt.textContent = m.nama_lengkap_murid;
                         selector.appendChild(opt);
                     });
-                } catch (e) { console.error(e); }
+                } catch (e) { console.error("Gagal memuat murid:", e); }
+            },
+
+            autoFillMurid: (nama) => {
+                const murid = dbMurid.find(m => m.nama_lengkap_murid === nama);
+                if (murid && document.getElementById('view_nis')) {
+                    document.getElementById('view_nis').value = murid.nis_nisn || '-';
+                    document.getElementById('view_kelas').value = murid.kelas || '-';
+                    document.getElementById('view_guru').value = murid.guru_wali || '-';
+                }
             },
 
             renderFloatingActions: () => `
                 <div class="fixed bottom-10 right-10 flex flex-col gap-4 no-print">
-                    <button type="submit" form="mainForm" class="action-btn bg-purple-600" title="Simpan"><i class="fas fa-save"></i></button>
-                    <button onclick="window.print()" class="action-btn bg-blue-500" title="Cetak"><i class="fas fa-print"></i></button>
+                    <button type="submit" form="mainForm" class="action-btn bg-indigo-600" title="Simpan Data"><i class="fas fa-save"></i></button>
+                    <button onclick="window.print()" class="action-btn bg-blue-500" title="Cetak ke PDF"><i class="fas fa-print"></i></button>
                 </div>
             `,
 
             handleSave: async (e) => {
                 e.preventDefault();
-                if (!API_URL) return alert("URL API belum diisi di kode!");
-                
                 const btn = e.submitter;
                 const originalHtml = btn.innerHTML;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -249,15 +342,22 @@
                     await fetch(API_URL, {
                         method: 'POST',
                         mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             menu: app.activeMenuId,
                             payload: payload
                         })
                     });
-                    alert("Data berhasil dikirim ke sistem!");
+                    
+                    alert("Data Berhasil Terkirim!");
                     e.target.reset();
+                    if(document.getElementById('view_nis')) {
+                        document.getElementById('view_nis').value = '-';
+                        document.getElementById('view_kelas').value = '-';
+                        document.getElementById('view_guru').value = '-';
+                    }
                 } catch (err) {
-                    alert("Terjadi kesalahan koneksi.");
+                    alert("Gagal terhubung ke server.");
                 } finally {
                     btn.innerHTML = originalHtml;
                     btn.disabled = false;
